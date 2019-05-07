@@ -7,12 +7,16 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-// app.get("/", (req, res) => { //Where are these parameters coming from? Registers a handler on the root path?
-//   res.send("Hello!") // What is res.send? Res is an object?
-// });
+app.get("/", (req, res) => { //Where are these parameters coming from? Registers a handler on the root path?
+  res.send("Hello!") // What is res.send? Res is an object?
+});
 
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
+  res.json(urlDatabase); // What is happening here?
+});
+
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n")
 });
 
 app.listen(PORT, () => { //Why does this function not take any parameters?
