@@ -15,7 +15,7 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase); // What is happening here?
 });
 
-app.get("/hello", (req, res) => {
+app.get("/hello", (req, res) => { // Is hello a file?
   res.send("<html><body>Hello <b>World</b></body></html>\n")
 });
 
