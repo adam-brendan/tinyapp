@@ -2,7 +2,7 @@ var express = require("express");
 var app = express(); //What is this function actually doing?
 var PORT = 8080; // Default port 8080
 
-app.set("view engine", "ejs");
+app.set("view engine", "ejs"); // tells the express app to use EJS as its templating engine, but why do we need this? What would happen if we didn't do this?
 
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -11,6 +11,13 @@ var urlDatabase = {
 
 app.get("/", (req, res) => { //Where are these parameters coming from? Registers a handler on the root path?
   res.send("Hello!") // What is res.send? Res is an object?
+});
+
+app.get("/urls", (req, res) => {
+  let templateVars = {
+    urls: urlDatabase
+  };
+  res.render("urls_index", templateVars);
 });
 
 app.get("/urls.json", (req, res) => {
