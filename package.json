@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/adam-brendan/w2d2#readme",
   "dependencies": {
+    "ejs": "^2.6.1",
     "express": "^4.16.4"
   }
 }
