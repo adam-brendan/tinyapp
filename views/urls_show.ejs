@@ -11,10 +11,9 @@
   <body style="font-size:20px; padding:50px;">
     <%- include('partials/_header'); %>
     
-    <h2>My URLs</h2>
-    <% for (shortURL in urls) {%>
-    <li><%= shortURL %>: <%= urls[shortURL] %></li>
-    <%};%>
+    <h2>TinyURL for <%= shortURL %> </h2>
+    <h4><%= longURL %></h4>
+
 
   </body>
 </html>
