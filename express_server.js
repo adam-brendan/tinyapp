@@ -1,6 +1,8 @@
 var express = require("express");
 // every time app.used, it is invoking an express function
 var app = express();
+var cookieParser = require('cookie-parser');
+app.use(cookieParser());
 var PORT = 8080; // Default port 8080
 
 // sets the view engine to use ejs
@@ -62,6 +64,7 @@ app.get("/", (req, res) => {
 // not necessary to include .ejs extension
 app.get("/urls", (req, res) => {
   let templateVars = {
+    username: req.cookies["username"],
     urls: urlDatabase
   };
   res.render("urls_index", templateVars);
@@ -71,7 +74,10 @@ app.get("/urls", (req, res) => {
 // what is being done here? why do we need it? how is this used in the rest of the program?
 // urls_new is a form where the user inputs a longURL
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_new", templateVars);
 });
 
 // a POST route that removes a URL resource: /urls/:shortURL/delete
@@ -84,9 +90,21 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // updates a user's longURL
 app.post("/urls/:id", (req, res) => {
-  console.log(req.body);
-  console.log(req.params.id);
+  // console.log(req.body);
+  // console.log(req.params.id);
   urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect("/urls");
+});
+
+// handles login form submission
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username)
+  res.redirect("/urls");
+});
+
+// handles logout form submission
+app.post("/logout", (req, res) => {
+  res.clearCookie("username")
   res.redirect("/urls");
 });
 
@@ -98,9 +116,14 @@ app.post("/urls/:id", (req, res) => {
 // the value for longURL comes from the original urlDatabse object at the shortURL key
 // urls_show is being rendered, and templateVars is passed to it
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  let templateVars = {
+    username: req.cookies["username"],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
+  };
   res.render("urls_show", templateVars);
 });
+
 
 // get request at /urls.json
 // to debug endpoints
