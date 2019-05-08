@@ -5,7 +5,6 @@ var PORT = 8080; // Default port 8080
 
 // sets the view engine to use ejs
 // view engine necessary to be able to use ejs files
-// what's the default of this?
 app.set("view engine", "ejs");
 
 var urlDatabase = {
@@ -25,7 +24,7 @@ function generateRandomString() {
   return result;
 }
 
-// look into what this does
+// read read me file on npm
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -53,7 +52,6 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 // test page
-// ask what res.send does - is it different from console.log?
 app.get("/", (req, res) => {
   res.send("Hello!")
 });
@@ -76,6 +74,16 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// add a POST route that removes a URL resource: POST /urls/:shortURL/delete
+// use Javascript's delete operator to remove the URL
+// after the resource has been deleted, redirect the client back to the urls_index page ("/urls")
+app.post("/urls/:shortURL/delete", (req, res) => {
+  console.log(urlDatabase);
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+});
+
+
 // get request being made on /urls/[passed shortURL]
 //templateVars object created
 //req.params is the full request from the user in the form of an object
@@ -88,12 +96,11 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 // get request at /urls.json
-// what's happening here? why do we need it?
+// to debug endpoints
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// what is this?
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n")
 });
