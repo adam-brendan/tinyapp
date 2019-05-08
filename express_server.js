@@ -74,12 +74,19 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-// add a POST route that removes a URL resource: POST /urls/:shortURL/delete
-// use Javascript's delete operator to remove the URL
-// after the resource has been deleted, redirect the client back to the urls_index page ("/urls")
+// a POST route that removes a URL resource: /urls/:shortURL/delete
+// after the resource has been deleted, redirection to /urls
 app.post("/urls/:shortURL/delete", (req, res) => {
   console.log(urlDatabase);
   delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
+});
+
+// updates a user's longURL
+app.post("/urls/:id", (req, res) => {
+  console.log(req.body);
+  console.log(req.params.id);
+  urlDatabase[req.params.id] = req.body.longURL;
   res.redirect("/urls");
 });
 

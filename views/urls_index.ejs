@@ -15,12 +15,13 @@
     <!--a list item is being generated for each shortURL: longURL-->
     <h2>My URLs</h2>
     <% for (shortURL in urls) {%>
-    <li><%= shortURL %>: <%= urls[shortURL] %></li>
-    <form class="form-inline" action="/urls/<%= shortURL %>/delete" method="POST">
-      <div class="form-group mb-2">
-        <button type="submit" class="btn btn-primary">Delete</button>
-      </div>
-    </form>
+      <li><%= shortURL %>: <%= urls[shortURL] %></li>
+      <form class="form-inline" action="/urls/<%= shortURL %>/delete" method="POST">
+        <div class="form-group mb-2">
+          <button type="submit" class="btn btn-primary">Delete</button>
+        </div>
+      </form>
+    <a href="/urls/<%= shortURL %>">Edit</a>
     <%};%>
 
   </body>
