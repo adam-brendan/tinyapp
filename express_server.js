@@ -1,7 +1,11 @@
 var express = require("express");
-var app = express(); //What is this function actually doing?
+// every time app.used, it is invoking an express function
+var app = express();
 var PORT = 8080; // Default port 8080
 
+// sets the view engine to use ejs
+// view engine necessary to be able to use ejs files
+// what's the default of this?
 app.set("view engine", "ejs");
 
 var urlDatabase = {
@@ -30,7 +34,6 @@ app.use(bodyParser.urlencoded({extended: true}));
 // shortURL is randomly generated from the called function
 // a new key value is passed to the urlDatabase object
 // client is redirected to the short URL generated for their long URL
-// this uses urls_new.ejs, but how?
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   var longURL = req.body.longURL;
@@ -40,15 +43,17 @@ app.post("/urls", (req, res) => {
 });
 
 // get request is made on /u/ from the provided shortURL
-// req.params is what's provided by the client, and shortURL is the key from that object
 // user is redirected to the longURL
+// e.g. for /u/b2xV2ns, req.params = {shortURL: "b2xVn2"}
+// longURL = urlDatabase["b2xVn2"]
+// res.redirect() is a method from the response library
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]
+  const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
 
-// get request is made on the root page
-// ask what res.send does
+// test page
+// ask what res.send does - is it different from console.log?
 app.get("/", (req, res) => {
   res.send("Hello!")
 });
@@ -89,7 +94,7 @@ app.get("/urls.json", (req, res) => {
 });
 
 // what is this?
-app.get("/hello", (req, res) => { // Is hello a file?
+app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n")
 });
 
