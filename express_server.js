@@ -2,7 +2,7 @@ var express = require("express");
 var app = express(); //What is this function actually doing?
 var PORT = 8080; // Default port 8080
 
-app.set("view engine", "ejs"); // tells the express app to use EJS as its templating engine, but why do we need this? What would happen if we didn't do this?
+app.set("view engine", "ejs");
 
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -24,11 +24,14 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  var longURL = req.body.longURL;
+  var shortURL = generateRandomString();
+  urlDatabase[shortURL] = longURL;
+  res.redirect(`/urls/${shortURL}`);         // Respond with 'Ok' (we will replace this)
 });
 
-app.get("/", (req, res) => { //Where are these parameters coming from? Registers a handler on the root path?
-  res.send("Hello!") // What is res.send? Res is an object?
+app.get("/", (req, res) => {
+  res.send("Hello!")
 });
 
 app.get("/urls", (req, res) => {
@@ -49,7 +52,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase); // What is happening here?
+  res.json(urlDatabase);
 });
 
 app.get("/hello", (req, res) => { // Is hello a file?
