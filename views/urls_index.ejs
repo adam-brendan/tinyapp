@@ -11,6 +11,8 @@
   <body style="font-size:20px; padding:50px;">
     <%- include('partials/_header'); %>
     
+    <!--shortURLS (newly declared) is the element called on urls object -->
+    <!--a list item is being generated for each shortURL: longURL-->
     <h2>My URLs</h2>
     <% for (shortURL in urls) {%>
     <li><%= shortURL %>: <%= urls[shortURL] %></li>
