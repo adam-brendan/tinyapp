@@ -16,6 +16,11 @@
     <h2>My URLs</h2>
     <% for (shortURL in urls) {%>
     <li><%= shortURL %>: <%= urls[shortURL] %></li>
+    <form class="form-inline" action="/urls" method="POST">
+      <div class="form-group mb-2">
+        <button type="button" class="btn btn-primary">Delete</button>
+      </div>
+    </form>
     <%};%>
 
   </body>
