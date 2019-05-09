@@ -11,7 +11,6 @@
   <body style="font-size:20px; padding:50px;">
     <h1>TinyApp</h1>
     <a href="/urls/new">Shorten a new URL!</a>
-    
     <% if (locals.user) {%>
       <p>Logged in as: <%= user.email %></p> 
       <form class="form-inline" action="/logout" method="POST">
@@ -20,13 +19,8 @@
         </div>
       </form>
     <% } else { %>
-          <form class="form-inline" action="/login" method="POST">
-          <h1>Sign In</h1>
-            <div class="form-group mb-2">
-              <input class="form-control" type="text" name="username" placeholder="Input username" style="width: 300px; margin: 1em">
-              <button type="submit" class="btn btn-primary">Sign In</button>
-            </div>
-          </form>
+          <br><a href="/registration">Register</a>
+          <a href="/login">Login</a>
     <% }; %>
 
 
