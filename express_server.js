@@ -30,6 +30,11 @@ const users = {
     id: "user2RandomID", 
     email: "user2@example.com", 
     password: "dishwasher-funk"
+  },
+  "test": {
+    id: "test", 
+    email: "test@test.com", 
+    password: "test"
   }
 }
 
@@ -75,9 +80,15 @@ app.get("/", (req, res) => {
 // templateVars obj is passed to urls_index.ejs via res.render
 app.get("/urls", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
     urls: urlDatabase
-  };
+  }
+  if (req.cookies.user_id) {
+    templateVars.user = {
+      id: req.cookies["user_id"],
+      email: users[req.cookies["user_id"]].email, 
+      password: users[req.cookies["user_id"]].password
+    }
+  }
   res.render("urls_index", templateVars);
 });
 
@@ -86,8 +97,13 @@ app.get("/urls", (req, res) => {
 // what is being done here? why do we need it? how is this used in the rest of the program?
 // urls_new is a form where the user inputs a longURL
 app.get("/urls/new", (req, res) => {
-  let templateVars = {
-    username: req.cookies["username"],
+  let templateVars = {}
+  if (req.cookies.user_id) {
+    templateVars.user = {
+      id: req.cookies["user_id"],
+      email: users[req.cookies["user_id"]].email, 
+      password: users[req.cookies["user_id"]].password
+    }
   };
   res.render("urls_new", templateVars);
 });
@@ -95,38 +111,42 @@ app.get("/urls/new", (req, res) => {
 // a POST route that removes a URL resource: /urls/:shortURL/delete
 // after the resource has been deleted, redirection to /urls
 app.post("/urls/:shortURL/delete", (req, res) => {
-  console.log(urlDatabase);
   delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
 // updates a user's longURL
 app.post("/urls/:id", (req, res) => {
-  // console.log(req.body);
-  // console.log(req.params.id);
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect("/urls");
 });
 
 // handles login form submission
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username)
+  res.cookie("user_id", req.body.id)
   res.redirect("/urls");
 });
 
 // handles logout form submission
 app.post("/logout", (req, res) => {
-  res.clearCookie("username")
+  res.clearCookie("user_id")
   res.redirect("/urls");
 });
 
 // displays page to register a new user
 app.get("/registration", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
-  };
+  }
+  // determine if the user is even logged in
+  if (req.cookies.user_id) {
+    templateVars.user = {
+      id: req.cookies.user_id,
+      email: users[req.cookies.user_id].email, 
+      password: users[req.cookies["user_id"]].password
+    }
+  }
   res.render("registration", templateVars);
 });
 
@@ -137,11 +157,15 @@ app.post("/registration", (req, res) => {
   var password = req.body.password;
 
   if (email && password && lookupEmail(email) === false) {
-    users[id] = {id, email, password}
+    users[id] = {
+      id: id, 
+      email: email,
+      password: password
+    }
     res.cookie("user_id", id);
     res.redirect("/urls");
   } else {
-    res.send("404 error");
+    return res.status(404).send("Input valid username and/or password.");
   }
 });
 
@@ -150,10 +174,9 @@ const lookupEmail = (emailID) => {
   for (user in users) {
     if(users[user].email === emailID) {
       return true;
-    } else {
-      return false;
     }
   }
+  return false;
 }
 
 
@@ -165,11 +188,22 @@ const lookupEmail = (emailID) => {
 // the value for longURL comes from the original urlDatabse object at the shortURL key
 // urls_show is being rendered, and templateVars is passed to it
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = {
-    username: req.cookies["username"],
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
-  };
+  if (req.cookies.user_id) {
+    let templateVars = {
+      user: {
+        id: req.cookies["user_id"],
+        email: users[req.cookies["user_id"]].email, 
+        password: users[req.cookies["user_id"]].password
+      },
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL]
+    }
+  } else {
+    let templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL]
+    }
+  }
   res.render("urls_show", templateVars);
 });
 
