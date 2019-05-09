@@ -207,6 +207,11 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// login page
+app.get("/login", (req, res) => {
+  res.render("login")
+});
+
 
 // get request at /urls.json
 // to debug endpoints
