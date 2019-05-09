@@ -123,9 +123,21 @@ app.post("/urls/:id", (req, res) => {
 
 // handles login form submission
 app.post("/login", (req, res) => {
-  res.cookie("user_id", req.body.id)
-  res.redirect("/urls");
+  var email = req.body.email;
+  var password = req.body.password;
+  if (lookupEmail(email) === false) {
+    return res.status(403).send("Invalid email. Try again.");
+  } else if (lookupEmail(email) === true) {
+    if (users[findUser(email)].password !== password) {
+      return res.status(403).send("Invalid password. Try again.");
+    } else if (users[findUser(email)].password === password) {
+      res.cookie("user_id", findUser(email));  
+      res.redirect("/urls");
+    }
+  }
 });
+
+
 
 // handles logout form submission
 app.post("/logout", (req, res) => {
@@ -179,6 +191,14 @@ const lookupEmail = (emailID) => {
   return false;
 }
 
+const findUser = (emailID) => {
+  for (let user in users) {
+    if (users[user].email === emailID) {
+      return user;
+    }
+  }
+  return null;
+}
 
 
 // get request being made on /urls/[passed shortURL]
