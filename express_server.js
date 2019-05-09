@@ -5,6 +5,11 @@ var cookieParser = require('cookie-parser');
 app.use(cookieParser());
 var PORT = 8080; // Default port 8080
 
+// read read me file on npm
+// used for forms?
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
+
 // sets the view engine to use ejs
 // view engine necessary to be able to use ejs files
 app.set("view engine", "ejs");
@@ -13,6 +18,20 @@ var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+// user ID, email, and password storage
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 
 // generates a 6-character string consisting of letters and numbers
 // function from https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript
@@ -26,15 +45,7 @@ function generateRandomString() {
   return result;
 }
 
-// read read me file on npm
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
-
-// post request is made on /urls
-// longURL is stored from the request
-// shortURL is randomly generated from the called function
-// a new key value is passed to the urlDatabase object
-// client is redirected to the short URL generated for their long URL
+// stores new URLs
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   var longURL = req.body.longURL;
@@ -58,10 +69,10 @@ app.get("/", (req, res) => {
   res.send("Hello!")
 });
 
-// get request is made on /urls page
+// pushes username information to index 
+//get request is made on /urls page
 // urlDatabase object in stored in templateVars object under the key "urls"
 // templateVars obj is passed to urls_index.ejs via res.render
-// not necessary to include .ejs extension
 app.get("/urls", (req, res) => {
   let templateVars = {
     username: req.cookies["username"],
@@ -70,6 +81,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+// still a little unclear what get is doing here
 // get request made on /urls/new page and is passed to urls_new.ejs
 // what is being done here? why do we need it? how is this used in the rest of the program?
 // urls_new is a form where the user inputs a longURL
@@ -108,6 +120,43 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+// displays page to register a new user
+app.get("/registration", (req, res) => {
+  let templateVars = {
+    username: req.cookies["username"],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
+  };
+  res.render("registration", templateVars);
+});
+
+// stores registation information
+app.post("/registration", (req, res) => {
+  var id = generateRandomString();
+  var email = req.body.email;
+  var password = req.body.password;
+
+  if (email && password && lookupEmail(email) === false) {
+    users[id] = {id, email, password}
+    res.cookie("user_id", id);
+    res.redirect("/urls");
+  } else {
+    res.send("404 error");
+  }
+});
+
+// helper function to check for instances of emails
+const lookupEmail = (emailID) => {
+  for (user in users) {
+    if(users[user].email === emailID) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+
 
 // get request being made on /urls/[passed shortURL]
 //templateVars object created
@@ -134,6 +183,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n")
 });
+
 
 // this starts the listen event at the above Port--this is displayed in terminal, too
 app.listen(PORT, () => { //Why does this function not take any parameters?

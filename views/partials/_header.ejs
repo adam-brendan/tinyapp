@@ -13,14 +13,15 @@
     <a href="/urls/new">Shorten a new URL!</a>
     
     <% if (username) {%>
-    <p>Logged in as: <%= username %></p> 
-    <form class="form-inline" action="/logout" method="POST">
-            <div class="form-group mb-2">
-              <button type="submit" class="btn btn-primary">Logout</button>
-            </div>
-          </form>
+      <p>Logged in as: <%= username %></p> 
+      <form class="form-inline" action="/logout" method="POST">
+        <div class="form-group mb-2">
+          <button type="submit" class="btn btn-primary">Logout</button>
+        </div>
+      </form>
     <% } else { %>
           <form class="form-inline" action="/login" method="POST">
+          <h1>Sign In</h1>
             <div class="form-group mb-2">
               <input class="form-control" type="text" name="username" placeholder="Input username" style="width: 300px; margin: 1em">
               <button type="submit" class="btn btn-primary">Sign In</button>
