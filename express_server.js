@@ -97,15 +97,17 @@ app.get("/urls", (req, res) => {
 // what is being done here? why do we need it? how is this used in the rest of the program?
 // urls_new is a form where the user inputs a longURL
 app.get("/urls/new", (req, res) => {
-  let templateVars = {}
   if (req.cookies.user_id) {
-    templateVars.user = {
-      id: req.cookies["user_id"],
-      email: users[req.cookies["user_id"]].email, 
-      password: users[req.cookies["user_id"]].password
+    let templateVars = {
+      user: {
+        id: req.cookies["user_id"],
+        email: users[req.cookies["user_id"]].email, 
+        password: users[req.cookies["user_id"]].password
+      }
     }
+    res.render("urls_new", templateVars);
   };
-  res.render("urls_new", templateVars);
+  res.redirect("urls")
 });
 
 // a POST route that removes a URL resource: /urls/:shortURL/delete
@@ -218,13 +220,16 @@ app.get("/urls/:shortURL", (req, res) => {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL]
     }
+  res.render("urls_show", templateVars);
+
   } else {
     let templateVars = {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL]
     }
+  res.redirect("/login");
+
   }
-  res.render("urls_show", templateVars);
 });
 
 // login page
