@@ -15,8 +15,14 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "userRandomID"
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "test"
+  }
 };
 
 // user ID, email, and password storage
@@ -55,8 +61,9 @@ app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   var longURL = req.body.longURL;
   var shortURL = generateRandomString();
-  urlDatabase[shortURL] = longURL;
-  res.redirect(`/urls/${shortURL}`);
+  urlDatabase[shortURL] = {longURL: longURL, userID: req.cookies["user_id"]};
+  // res.redirect(`/urls/${shortURL}`); to navigate to shortURL
+  res.redirect("urls");
 });
 
 // get request is made on /u/ from the provided shortURL
@@ -65,7 +72,7 @@ app.post("/urls", (req, res) => {
 // longURL = urlDatabase["b2xVn2"]
 // res.redirect() is a method from the response library
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.cookies["user_id"]].longURL;
   res.redirect(longURL);
 });
 
@@ -78,18 +85,26 @@ app.get("/", (req, res) => {
 //get request is made on /urls page
 // urlDatabase object in stored in templateVars object under the key "urls"
 // templateVars obj is passed to urls_index.ejs via res.render
+// TRYING TO PRINT ONLY THE LIST OF URLS FOR THE LOGGED IN USER
+// if statement not running
 app.get("/urls", (req, res) => {
-  let templateVars = {
-    urls: urlDatabase
-  }
-  if (req.cookies.user_id) {
-    templateVars.user = {
-      id: req.cookies["user_id"],
-      email: users[req.cookies["user_id"]].email, 
-      password: users[req.cookies["user_id"]].password
+  if (req.cookies["user_id"]) {
+    let shortURL = urlsForUser(req.cookies["user_id"]);
+    let templateVars =  {
+      user: {
+        id: req.cookies["user_id"],
+        shortURL: shortURL,
+        email: users[req.cookies["user_id"]].email
+      }
     }
-  }
+    console.log(req.cookies["user_id"])
   res.render("urls_index", templateVars);
+  } else {
+    let templateVars = {
+      user: undefined
+    }
+    res.render("urls_index", templateVars)
+  }
 });
 
 // still a little unclear what get is doing here
@@ -107,7 +122,7 @@ app.get("/urls/new", (req, res) => {
     }
     res.render("urls_new", templateVars);
   };
-  res.redirect("urls")
+  res.redirect("/urls")
 });
 
 // a POST route that removes a URL resource: /urls/:shortURL/delete
@@ -119,13 +134,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // updates a user's longURL
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
 // handles login form submission
+// sets cookie after user login
 app.post("/login", (req, res) => {
-  var email = req.body.email;
+  var email = req.body.email; 
   var password = req.body.password;
   if (lookupEmail(email) === false) {
     return res.status(403).send("Invalid email. Try again.");
@@ -133,7 +149,7 @@ app.post("/login", (req, res) => {
     if (users[findUser(email)].password !== password) {
       return res.status(403).send("Invalid password. Try again.");
     } else if (users[findUser(email)].password === password) {
-      res.cookie("user_id", findUser(email));  
+      res.cookie("user_id", findUser(email));
       res.redirect("/urls");
     }
   }
@@ -149,19 +165,22 @@ app.post("/logout", (req, res) => {
 
 // displays page to register a new user
 app.get("/registration", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
-  }
-  // determine if the user is even logged in
-  if (req.cookies.user_id) {
-    templateVars.user = {
-      id: req.cookies.user_id,
-      email: users[req.cookies.user_id].email, 
-      password: users[req.cookies["user_id"]].password
+  if (req.cookies["user_id"]) {
+    let shortURL = urlsForUser(req.cookies["user_id"]);
+    let templateVars =  {
+      user: {
+        id: req.cookies["user_id"],
+        shortURL: shortURL,
+        email: users[req.cookies["user_id"]].email
+      }
     }
-  }
   res.render("registration", templateVars);
+  } else {
+    let templateVars = {
+      user: undefined
+    }
+    res.render("registration", templateVars)
+  }
 });
 
 // stores registation information
@@ -202,6 +221,16 @@ const findUser = (emailID) => {
   return null;
 }
 
+const urlsForUser = (id) => {
+  let urls = [];
+  for (let url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      urls.push(url)
+    }
+  }
+  return urls;
+}
+
 
 // get request being made on /urls/[passed shortURL]
 //templateVars object created
@@ -211,30 +240,39 @@ const findUser = (emailID) => {
 // urls_show is being rendered, and templateVars is passed to it
 app.get("/urls/:shortURL", (req, res) => {
   if (req.cookies.user_id) {
+    let shortURL = urlsForUser(req.cookies["user_id"]);
     let templateVars = {
       user: {
         id: req.cookies["user_id"],
         email: users[req.cookies["user_id"]].email, 
-        password: users[req.cookies["user_id"]].password
-      },
-      shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL]
+        password: users[req.cookies["user_id"]].password,
+        shortURL: shortURL
+      }
     }
-  res.render("urls_show", templateVars);
-
+    res.render("urls_index", templateVars);
   } else {
-    let templateVars = {
-      shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL]
-    }
-  res.redirect("/login");
-
+    res.redirect("/login");
   }
 });
 
 // login page
 app.get("/login", (req, res) => {
-  res.render("login")
+  if (req.cookies["user_id"]) {
+    let shortURL = urlsForUser(req.cookies["user_id"]);
+    let templateVars =  {
+      user: {
+        id: req.cookies["user_id"],
+        shortURL: shortURL,
+        email: req.cookies["user_id"].email
+      }
+    }
+    res.render("login", templateVars);
+  } else {
+    let templateVars = {
+      user: undefined
+    }
+    res.render("login", templateVars)
+  }
 });
 
 
