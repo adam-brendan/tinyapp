@@ -58,12 +58,12 @@ function generateRandomString() {
 
 // stores new URLs
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  var longURL = req.body.longURL;
-  var shortURL = generateRandomString();
-  urlDatabase[shortURL] = {longURL: longURL, userID: req.cookies["user_id"]};
-  // res.redirect(`/urls/${shortURL}`); to navigate to shortURL
-  res.redirect("urls");
+  if (req.cookies["user_id"]) {
+    var longURL = req.body.longURL;
+    var shortURL = generateRandomString();
+    urlDatabase[shortURL] = {longURL: longURL, userID: req.cookies["user_id"]};
+    res.redirect("/urls");
+  }
 });
 
 // get request is made on /u/ from the provided shortURL
@@ -89,15 +89,10 @@ app.get("/", (req, res) => {
 // if statement not running
 app.get("/urls", (req, res) => {
   if (req.cookies["user_id"]) {
-    let shortURL = urlsForUser(req.cookies["user_id"]);
     let templateVars =  {
-      user: {
-        id: req.cookies["user_id"],
-        shortURL: shortURL,
-        email: users[req.cookies["user_id"]].email
-      }
+      urls: urlsForUser(req.cookies["user_id"]),
+      user: users[req.cookies["user_id"]]
     }
-    console.log(req.cookies["user_id"])
   res.render("urls_index", templateVars);
   } else {
     let templateVars = {
@@ -114,11 +109,8 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   if (req.cookies.user_id) {
     let templateVars = {
-      user: {
-        id: req.cookies["user_id"],
-        email: users[req.cookies["user_id"]].email, 
-        password: users[req.cookies["user_id"]].password
-      }
+      urls: urlsForUser(req.cookies["user_id"]),
+      user: users[req.cookies["user_id"]]
     }
     res.render("urls_new", templateVars);
   };
@@ -128,14 +120,25 @@ app.get("/urls/new", (req, res) => {
 // a POST route that removes a URL resource: /urls/:shortURL/delete
 // after the resource has been deleted, redirection to /urls
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
+  if (req.cookies["user_id"]) {
+    delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
+  }
+  else {
+    res.redirect("urls")
+  }
 });
 
 // updates a user's longURL
-app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id].longURL = req.body.longURL;
-  res.redirect("/urls");
+app.post("/urls/:shortURL", (req, res) => {
+  const shortU = req.params.shortURL;
+  const userID = req.cookies["user_id"];
+  if (userID === urlDatabase[shortU].userID) {
+    urlDatabase[shortU].longURL = req.body.longURL;
+    res.redirect("/urls") 
+  } else {
+    res.redirect("/login");
+  }
 });
 
 // handles login form submission
@@ -150,6 +153,7 @@ app.post("/login", (req, res) => {
       return res.status(403).send("Invalid password. Try again.");
     } else if (users[findUser(email)].password === password) {
       res.cookie("user_id", findUser(email));
+
       res.redirect("/urls");
     }
   }
@@ -166,13 +170,9 @@ app.post("/logout", (req, res) => {
 // displays page to register a new user
 app.get("/registration", (req, res) => {
   if (req.cookies["user_id"]) {
-    let shortURL = urlsForUser(req.cookies["user_id"]);
     let templateVars =  {
-      user: {
-        id: req.cookies["user_id"],
-        shortURL: shortURL,
-        email: users[req.cookies["user_id"]].email
-      }
+      urls: urlsForUser(req.cookies["user_id"]),
+      user: users[req.cookies["user_id"]]
     }
   res.render("registration", templateVars);
   } else {
@@ -222,34 +222,26 @@ const findUser = (emailID) => {
 }
 
 const urlsForUser = (id) => {
-  let urls = [];
+  let userURLs = {};
   for (let url in urlDatabase) {
     if (urlDatabase[url].userID === id) {
-      urls.push(url)
+      userURLs[url] = urlDatabase[url]
     }
   }
-  return urls;
+  return userURLs;
 }
 
 
 // get request being made on /urls/[passed shortURL]
 //templateVars object created
-//req.params is the full request from the user in the form of an object
-//req.params.shortURL is the value of the shortURL key passed by the user
-// the value for longURL comes from the original urlDatabse object at the shortURL key
-// urls_show is being rendered, and templateVars is passed to it
 app.get("/urls/:shortURL", (req, res) => {
   if (req.cookies.user_id) {
-    let shortURL = urlsForUser(req.cookies["user_id"]);
     let templateVars = {
-      user: {
-        id: req.cookies["user_id"],
-        email: users[req.cookies["user_id"]].email, 
-        password: users[req.cookies["user_id"]].password,
-        shortURL: shortURL
-      }
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL].longURL,
+      user: users[req.cookies["user_id"]]
     }
-    res.render("urls_index", templateVars);
+    res.render("urls_show", templateVars);
   } else {
     res.redirect("/login");
   }
@@ -258,13 +250,9 @@ app.get("/urls/:shortURL", (req, res) => {
 // login page
 app.get("/login", (req, res) => {
   if (req.cookies["user_id"]) {
-    let shortURL = urlsForUser(req.cookies["user_id"]);
     let templateVars =  {
-      user: {
-        id: req.cookies["user_id"],
-        shortURL: shortURL,
-        email: req.cookies["user_id"].email
-      }
+      urls: urlsForUser(req.cookies["user_id"]),
+      user: users[req.cookies["user_id"]]
     }
     res.render("login", templateVars);
   } else {

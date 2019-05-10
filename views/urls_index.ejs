@@ -13,15 +13,16 @@
     
 
     <% if (user) {%>
-      <h2>My URLs</h2>
-      <% for (url in user.shortURL) {%>
-        <li>shortURL: <%= user.shortURL %></li>
-        <form class="form-inline" action="/urls/<%= user.shortURL %>/delete" method="POST">
+      <br><h2>My URLs</h2>
+      <% for (shortURL in urls) {%>
+        <br><p>shortURL: <%= shortURL %></p>
+        <p><%= urls[shortURL].longURL %></p>
+        <form class="form-inline" action="/urls/<%= shortURL %>/delete" method="POST">
           <div class="form-group mb-2">
             <button type="submit" class="btn btn-primary">Delete</button>
           </div>
         </form>
-      <a href="/urls/<%= user.shortURL %>">Edit</a>
+      <a href="/urls/<%= shortURL %>">Edit</a>
       <%};%>
     <% } else { %>
       <h2> Login or register</h2>

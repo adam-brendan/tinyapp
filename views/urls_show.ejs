@@ -11,17 +11,18 @@
   <body style="font-size:20px; padding:50px;">
     <%- include('partials/_header'); %>
     
-    <!--shortURL is being displayed along with longURL-->
+  <% if (user) { %>
+    <h1>Edit your URL</h1>
     <h2>TinyURL for <%= shortURL %> </h2>
     <h4><%= longURL %></h4>
 
-<!--include a form with two elements – a text input and a button.-->
     <form class="form-inline" action="/urls/<%= shortURL %>" method="POST">
       <div class="form-group mb-2">
         <input class="form-control" type="text" name="longURL" placeholder="http://" style="width: 300px">
         <button type="submit" class="btn btn-primary">Update</button>
       </div>
     </form>
+    <% }; %>
 
 
   </body>
