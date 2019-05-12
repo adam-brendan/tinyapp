@@ -14,7 +14,7 @@
   <% if (user) { %>
     <h1>Edit your URL</h1>
     <h2>TinyURL for <%= shortURL %> </h2>
-    <h4><%= longURL %></h4>
+    <a href="<%= longURL %>"><h4><%= longURL %></h4></a>
 
     <form class="form-inline" action="/urls/<%= shortURL %>" method="POST">
       <div class="form-group mb-2">

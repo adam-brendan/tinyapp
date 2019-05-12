@@ -119,19 +119,27 @@ app.post("/login", (req, res) => {
 
 // stores registation information
 app.post("/registration", (req, res) => {
-  let id = generateRandomString();
-  let email = req.body.email;
-  let password = bcrypt.hashSync(req.body.password, 10)
-  if (email && password && lookupEmail(email) === false) {
-    users[id] = {
-      id: id, 
-      email: email,
-      password: bcrypt.hashSync(password, 10)
+  if (!req.session["user_id"]) {
+    if (!req.body.password || !req.body.email) {
+      return res.status(404).send("Empty username or password. Please try again.")
     }
-    res.session("user_id", id);
-    res.redirect("/urls");
-  } else {
-    return res.status(404).send("Input valid username and/or password.");
+    let id = generateRandomString();
+    let email = req.body.email;
+    let password = bcrypt.hashSync(req.body.password, 10)
+    if (email && password && lookupEmail(email) === false) {
+      users[id] = {
+        id: id, 
+        email: email,
+        password: bcrypt.hashSync(password, 10)
+      }
+      req.session.user_id = id;
+      res.redirect("/urls")
+    } else if (lookupEmail(email) === true) {
+      return res.status(404).send("Email already in use. Please use a different email.");
+    }
+  }
+  else {
+    res.redirect("/urls")
   }
 });
 
@@ -185,12 +193,12 @@ app.get("/login", (req, res) => {
       urls: urlsForUser(req.session["user_id"]),
       user: users[req.session["user_id"]]
     }
-    res.render("login", templateVars);
+    res.redirect("/urls");
   } else {
     let templateVars = {
       user: undefined
     }
-    res.render("login", templateVars)
+    res.render("login", templateVars);
   }
 });
 
@@ -226,6 +234,8 @@ app.get("/urls/new", (req, res) => {
       user: users[req.session["user_id"]]
     }
     res.render("urls_new", templateVars);
+  } else {
+      res.redirect("/login")
   }
 });
 
@@ -238,7 +248,7 @@ app.get("/u/:shortURL", (req, res) => {
     let longURL = urlDatabase[req.params.shortURL].longURL;
     res.redirect(longURL);
   } else {
-    res.redirect("login");
+    res.redirect("/login");
   }
 });
 
