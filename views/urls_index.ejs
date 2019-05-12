@@ -16,7 +16,7 @@
       <br><h2>My URLs</h2>
       <% for (shortURL in urls) {%>
         <br><p>shortURL: <%= shortURL %></p>
-        <p><%= urls[shortURL].longURL %></p>
+        <a href="http://<%urls[shortURL].longURL%><%= urls[shortURL].longURL%>"><%urls[shortURL].longURL%><%= urls[shortURL].longURL%></a>
         <form class="form-inline" action="/urls/<%= shortURL %>/delete" method="POST">
           <div class="form-group mb-2">
             <button type="submit" class="btn btn-primary">Delete</button>
@@ -25,7 +25,7 @@
       <a href="/urls/<%= shortURL %>">Edit</a>
       <%};%>
     <% } else { %>
-      <h2> Login or register</h2>
+      <h2>Login or register</h2>
     <% }; %>
 
 
