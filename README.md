@@ -8,6 +8,9 @@ TinyApp is a full stack web application built with Node and Express that allows 
 2. Install dependencies using the npm install command.
 3. Start the web server using the npm run local command. The app will be served at http://localhost:8080/.
 4. Go to http://localhost:8080/registration in your browser.
+5. After registering an account, click "Shorten a new URL" and type in a long URL that you wish to shorten.
+6. Your new short URL link can be visited by going http://localhost:8080/u/<YOUR SHORT URL HERE> whether you are logged in or not.
+7. Your short URLs can also be deleted or edited to refer to a different long URL.
 
 ## Screenshots
 
