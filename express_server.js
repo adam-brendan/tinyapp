@@ -249,8 +249,12 @@ app.get("/u/:shortURL", (req, res) => {
   console.log("req.params: ", req.params.shortURL)
   console.log("the url::::::::::::::", urlDatabase[req.params.shortURL].longURL)
   let longURL = urlDatabase[req.params.shortURL].longURL;
-
-  res.redirect(longURL);
+  if (longURL.substring(0, 3) === "http" || longURL.substring(0, 4) === "https") {
+    res.redirect(longURL);
+  } else {
+    longURL = "https://" + longURL
+    res.redirect(longURL)
+  }
 });
 
 // edit page for URLs
