@@ -124,7 +124,7 @@ app.post("/registration", (req, res) => {
     }
     let id = generateRandomString();
     let email = req.body.email;
-    let password = bcrypt.hashSync(req.body.password, 10);
+    let password = req.body.password;
     if (email && password && lookupEmail(email) === false) {
       users[id] = {
         id: id, 
@@ -153,7 +153,9 @@ app.post("/urls", (req, res) => {
   if (req.session["user_id"]) {
     let longURL = req.body.longURL;
     let shortURL = generateRandomString();
-    urlDatabase[shortURL] = {longURL: longURL, userID: req.session["user_id"]};
+    // console.log("urlDatabase: ", urlDatabase)
+    urlDatabase[shortURL.toString()] = { longURL: longURL, userID: req.session["user_id"] };
+    // console.log("urlDatabase after: ", urlDatabase)
     res.redirect("/urls");
   } else {
     res.redirect("/login")
@@ -243,12 +245,12 @@ app.get("/urls/new", (req, res) => {
 // longURL = urlDatabase["b2xVn2"]
 // need more work on this
 app.get("/u/:shortURL", (req, res) => {
-  if (req.session["user_id"]) {
-    let longURL = urlDatabase[req.params.shortURL].longURL;
-    res.redirect(longURL);
-  } else {
-    res.redirect("/login");
-  }
+  console.log(urlDatabase)
+  console.log("req.params: ", req.params.shortURL)
+  console.log("the url::::::::::::::", urlDatabase[req.params.shortURL].longURL)
+  let longURL = urlDatabase[req.params.shortURL].longURL;
+
+  res.redirect(longURL);
 });
 
 // edit page for URLs
